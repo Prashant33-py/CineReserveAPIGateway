@@ -1,0 +1,23 @@
+spring:
+    cloud:
+        gateway:
+            server:
+                webflux:
+                    routes:
+                        - id: cine-reserve-user-service
+                          predicates:
+                            - Path=/api/cine-reserve/user/**
+                          uri: lb://CINE-RESERVE-USER-SERVICE
+                        - id: cine-reserve-movie-service
+                          predicates:
+                            - Path=/api/cine-reserve/movie/**
+                          uri: lb://CINE-RESERVE-MOVIE-SERVICE
+    application:
+        name: CINE-RESERVE-GATEWAY
+
+eureka:
+    client:
+        service-url:
+            defaultZone: http://localhost:8761/eureka/
+    instance:
+        hostname: localhost
