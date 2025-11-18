@@ -1,3 +1,5 @@
+server:
+  port: 8084
 spring:
     application:
         name: CINE-RESERVE-GATEWAY
@@ -7,5 +9,19 @@ spring:
             defaultZone: http://localhost:8761/eureka/
     instance:
         hostname: localhost
+    cloud:
+        gateway:
+            server:
+              webflux:
+                routes:
+                  - id: user-service
+                    uri: lb://CINE-RESERVE-USER-SERVICE
+                    predicates:
+                      - Path=/api/cine-reserve/user/**
+                  - id: movie-service
+                    uri: lb://CINE-RESERVE-MOVIE-SERVICE
+                    predicates:
+                      - Path=/api/cine-reserve/movie/**
+
 jwt:
     secret: ${JWT_SECRET}
