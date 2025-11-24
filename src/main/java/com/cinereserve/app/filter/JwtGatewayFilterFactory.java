@@ -29,34 +29,26 @@ public class JwtGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtGat
             String path = exchange.getRequest().getURI().getPath();
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
 
+            if (path.startsWith("/api/cine-reserve/user/login") ||
+                    path.startsWith("/api/cine-reserve/user/register")) {
+                return chain.filter(exchange);
+            }
+
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return this.onError(exchange, "Missing or invalid Authorization header");
+            }
+
+            String token = authHeader.substring(7);
+
             try {
-
-                if (path.startsWith("/api/cine-reserve/user/login") ||
-                        path.startsWith("/api/cine-reserve/user/register")) {
-                    return chain.filter(exchange);
-                }
-
-                if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                    return this.onError(exchange, "Missing or invalid Authorization header");
-                }
-
-                String token = authHeader.substring(7);
-
                 Claims claims = Jwts.parser()
                         .verifyWith(key)
                         .build()
                         .parseSignedClaims(token)
                         .getPayload();
-
-                exchange = exchange.mutate()
-                        .request(r -> r.headers(headers -> {
-                            headers.add("X-User-Id", claims.getSubject());
-                            headers.add("X-User-Roles", String.join(",", claims.get("role", String.class)));
-                        }))
-                        .build();
-
-            } catch (ExpiredJwtException e) {
-                return this.onError(exchange, "Invalid JWT token");
+            }
+            catch (ExpiredJwtException e){
+                return this.onError(exchange, e.getMessage());
             }
 
             return chain.filter(exchange);
