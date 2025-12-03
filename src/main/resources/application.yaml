@@ -22,6 +22,10 @@ spring:
                     uri: lb://CINE-RESERVE-MOVIE-SERVICE
                     predicates:
                       - Path=/api/cine-reserve/movie/**
+                  - id: theatre-service
+                    uri: lb://CINE-RESERVE-THEATRE-SERVICE
+                    predicates:
+                      - Path=/api/cine-reserve/theatre/**
 
 jwt:
     secret: ${JWT_SECRET}
